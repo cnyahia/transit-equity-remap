@@ -1,6 +1,7 @@
 # CapRemap: Transit Equity Analysis
 ![net](figs/network.PNG)
 
+## Description
 To view code, problem description, and *interactive plots*, check out [https://cnyahia.github.io/transit-equity-remap/](https://cnyahia.github.io/transit-equity-remap/).
 For more discussion on this analysis visit 
 
@@ -21,5 +22,12 @@ the census tracts and the buffers is used to weight the contribution of each tra
 
 The results indicate that CapRemap did not significantly improve service throughout the network. In fact, for all demographics, there was a decrease in the expected number of buses passing during the morning peak. 
 Although CapMetro provided a *high frequency network* with improved service on specific routes, these improvements were at the expense of other non-frequent lines. That said, in contrast to activists' claims, there is no clear 
-indication that minorities experienced greater service reductions. The fraction of total doors opening (service improvements) that was located in minority areas is similar to the fraction of total doors closing (service reductions) 
-that was inflicted on minority areas (i.e., no significant *net* change in AM peak service); this also applies to areas with White people. 
+indication that minorities experienced greater service reductions. Minority areas were alloted 55% of the total service improvements (doors opening) and they received 52% of the total service reductions. Meanwhile, areas with 
+White people were alloted 45% of the total service improvements and they received 47% of the total service reductions. These results show that minority areas did not receive a lower fraction of the service improvements and a 
+greater fraction of the service reductions, which indicates that there is no apparent bias in the distribution of service changes. 
+
+## Files
+
+* `equity.ipynb`: notebook with full equity and data analysis
+* `utils.py`: utility functions that support the analysis in `equity.ipynb`
+* `index.html`: an HTML file that renders interactive plots and code given in `equity.ipynb`
