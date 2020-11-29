@@ -1,5 +1,6 @@
 # CapRemap: Transit Equity Analysis
 ![net](figs/network.PNG)
+
 To view code, problem description, and *interactive plots*, check out [https://cnyahia.github.io/transit-equity-remap/](https://cnyahia.github.io/transit-equity-remap/).
 For more discussion on this analysis visit 
 
