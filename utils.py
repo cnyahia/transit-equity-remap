@@ -12,77 +12,94 @@ import datetime
 
 
 
-def getBusCount(stops_row, dep_times):
+def getBusCount(stops_row_id, dep_times):
     '''
-    This method takes in a *row* of the stops geodataframe
-    that includes information on each stop, with a column
-    `STOP ID` that includes integer ID values.
+    This method takes in a *row* of the stops[`STOP_ID`] *Series*
+    
     The method also takes in dep_times, which is a
     dataframe with columns
     `stop_id` `departure_time`
      66            9:35:38
      66            9:00:41  
+     
     The method returns the number of departure times in the 
     dep_times dataframe for the current `STOP ID` in the row
-    of the stops geodataframe
+    of the stops[`STOP_ID`] *Series*
     -----
-    :input stops_row: a *row* of a geodataframe describing stops
+    :input stops_row_id: the `STOP_ID` of a *row* of the stops[`STOP_ID`] Series
     :input dep_times: a dataframe with departure times for each stop
     :return: the number of departure times for the current stops_row
+    -----
     '''
-    stop_id = stops_row['STOP_ID']  # the method is applied by row
-    return dep_times[dep_times['stop_id']==stop_id].shape[0]
+    return dep_times[dep_times['stop_id']==stops_row_id].shape[0]
 
 
 
-def getStopPropDemog(stops_row, census, group='prop_minority'):
+def getStopPropDemog(stops_row_buffer, census, group='prop_minority'):
     '''
-    Extracts the percent group (e.g. % minority) at the stop level
+    Extracts the percent group (e.g. prop. minority) at the stop level
     from the census data
-    - The input stops_row is a row of the dataframe including
-    stops information with the attribute `buffer` being
-    the 1/4 mile radius circle around the stop
-    - census is a geodataframe with census data, where this gdf
+    
+    - The input stops_row_buffer is a *row* of the *GeoSeries* describing the 
+    stops[`buffer`], where the `buffer` is a 1/4 mile radius circle around the stop
+    
+    - census is a *GeoDataFrame* with census data, where this gdf
     is used to find census tracts that overlap with each stop,
     and then map the census tract info. to the stop
+    
     -----
-    :input stops_row: a row of the gdf describing stops
+    :input stops_row_buffer: a row of the GeoSeries describing stops['buffer']
     :input census: a geodataframe with census demographic data
-    :input group: the %(demographic) attribute that we're mapping
+    :input group: the (prop. demographic) attribute that we're mapping
     from census tracts to the stop
-    :return: stop level %demographic
+    :return: stop level prop. demographic
+    -----
     '''
-    census_intersects = census['geometry'].intersection(stops_row['buffer'])
+    census_intersects = census['geometry'].intersection(stops_row_buffer)
     nonempty_intersects = census_intersects[census_intersects.is_empty == False]
     
     per_group_tracts = list()  # stores the contribution of percent minority in each tract
     # weights the percent contribution by area of stop in tract
     
     for idx_tract, inter_poly in nonempty_intersects.iteritems():
-        ratio = (inter_poly.area)/(stops_row['buffer'].area)
+        ratio = (inter_poly.area)/(stops_row_buffer.area)
         per_group_tracts.append(  (ratio)*(census.loc[idx_tract, group])  )
     
     return sum(per_group_tracts)
 
 
 
-def getStopDemog(stops_row, census, group='minority'):
+def getStopDemog(stops_row_buffer, census, group='minority'):
     '''
     Extracts the number of group members within a stop (e.g. number of Black people)
-    - The input stops_row is a row of the dataframe including
-    stops information with the attribute `buffer` being
-    the 1/4 mile radius circle around the stop
-    - census is a geodataframe with census data, where this gdf
+    
+    - The input stops_row_buffer is a *row* of the *GeoSeries* describing the 
+    stops[`buffer`], where the `buffer` is a 1/4 mile radius circle around the stop
+    
+    - census is a *GeoDataFrame* with census data, where this gdf
     is used to find census tracts that overlap with each stop,
     and then map the census tract info. to the stop
+    
+    Note: when passed *census_intersect_coverage* instead of stops_row_buffer, where
+    census_intersects_coverage is the unary_union of all the stops, this method
+    returns the proportion of group (e.g. minority) that overlaps with the entire
+    coverage area. In other words, this method would map demographic groups to the
+    entire coverage area when the coverage area is passed. In that case, the method
+    would not be applied row-wise to an entire GeoSeries!
+    
+    Note: demographic groups considered are not normalized (i.e., minority not 
+    proportion of minorities), where we need to divide by the tract area to find
+    the proportion of group within the intersection area.
+    
     -----
-    :input stops_row: a row of the gdf describing stops
-    :input census: a geodataframe with census demographic data
-    :input group: the %(demographic) attribute that we're mapping
+    :input stops_row_buffer: a row of the GeoSeries describing stops['buffer'] || or, the union of all stops
+    :input census: a geodataframe with census demographic data and attribute `geometry`
+    :input group: the (demographic) attribute that we're mapping
     from census tracts to the stop
-    :return: stop level %demographic
+    :return: stop level demographic || or, demographic in the union of all stops
+    -----
     '''
-    census_intersects = census['geometry'].intersection(stops_row['buffer'])
+    census_intersects = census['geometry'].intersection(stops_row_buffer)
     nonempty_intersects = census_intersects[census_intersects.is_empty == False]
     
     group_tracts = list()  # stores the contribution of minorities from each tract
@@ -95,7 +112,7 @@ def getStopDemog(stops_row, census, group='minority'):
     return sum(group_tracts)
 
 
-
+"""
 def getCensusBusDiff(census_row, total_stops_phwd, net='positive'):
     '''
     Maps stops-level change in bus service `impact` to census level
@@ -136,74 +153,71 @@ def getCensusBusDiff(census_row, total_stops_phwd, net='positive'):
         bus_diff_prop = (extract.loc[idx_stops_tract_row, 'impact'])*(prop_area)  # get the contribution of the stop BUS_DIFF to the census level impact
         tractBusDiff += bus_diff_prop  # update dict at current TAZ value with the contribution of this stop to impact
     return tractBusDiff
+"""
 
 
-
-def getDoorsOpening(stops_row):
+def getDoorsOpening(stops_row_impact):
     '''
-    For a row of the stops geodataframe, stops_row, the output
+    For a row of the stops[`impact`] *Series*, stops_row_impact, the output
     takes the value of `impact` for the stops with positive `impact`
     and places a value of zero for stops with negative `impact`
     -----
-    :input stops_row: row of the stops gdf, with the col. `impact`
-    representing the change in service after CapRemap
+    :input stops_row_impact: row of the stops[`impact`] Series, 
+    where `impact` represents the change in service after CapRemap
     :return: `impact` of positively impacted stops, 0 o.w. 
     -----
     '''
-    return max(stops_row['impact'], 0)
+    return max(stops_row_impact, 0)
 
 
 
-def getDoorsClosing(stops_row):
+def getDoorsClosing(stops_row_impact):
     '''
-    For a row of the stops geodataframe, stops_row, the output
+    For a row of the stops[`impact`] *Series*, stops_row_impact, the output
     takes the value of `impact` for the stops with negative `impact`
     and places a value of zero for stops with positive `impact`
     -----
-    :input stops_row: row of the stops gdf, with the col. `impact`
-    representing the change in service after CapRemap
+    :input stops_row_impact: row of the stops[`impact`] Series, 
+    where `impact` represents the change in service after CapRemap
     :return: `impact` of negatively impacted stops, 0 o.w. 
     -----
     '''
-    return max(-stops_row['impact'], 0)
+    return max(-stops_row_impact, 0)
 
 
 
-def getBusDiffBool(total_stops_row, threshold=10):
+def getBusDiffBool(stops_row_impact, threshold=10):
     '''
-    This method takes in a *row* of a geodataframe with info. on the stops.
-    The geodataframe must have a column labeled `impact` that represents the
-    change in service after implementation of CapRemap.
-    The output is -1,0, or 1 if the `impact` is less than threshold, between
+    For a row of the stops[`impact`] *Series*, stops_row_impact,
+    the output is -1,0, or 1 if the `impact` is less than threshold, between
     (-threshold, threshold), or greater than threshold.
     -----
-    :input total_stops_row: row of the stops geodataframe
+    :input stops_row_impact: a row of the stops[`impact`] *Series*
     :input threshold: margin beyond which a change in counts is significant
     :output: boolean indicator if above or below threshold
+    -----
     '''
-    if total_stops_row['impact'] <= -threshold:
+    if stops_row_impact <= -threshold:
         return -1
-    elif total_stops_row['impact'] >= threshold:
+    elif stops_row_impact >= threshold:
         return 1
     else:
         return 0
 
     
     
-def isPeak(departureTimes_sup, peak_hour):
+def isPeak(departureTime, peak_hour):
     '''
-    goes through a row of the stop_times_sup.txt
-    df and checks if the row is within peak hour
-    this stop_times_sup.txt file gives departure times
-    per stop
+    goes through a row of the *Series* representing the `departure_time` col.
+    in stop_times_sup.txt and checks if the `departure_time` is within the peak hour
     -----
-    :input stop_trips: a row of stop_times_sup.txt from GTFS data
-    :input valid_trips: pre-determined trip IDs that fall within service IDs
-    that represent weekday trips (and not special events)
-    :input peak_hour: a tuple representing our definition of peak_hour
-    :output boolean: 1 if trip is valid, 0 otherwise
+    :input departureTimes: a row of the *Series* corresponding to `departure_time` in
+    stop_times_sup.txt, where stop_times_sup.txt comes from the GTFS data
+    :input peak_hour: a tuple representing our definition of *morning peak*
+    :output boolean: 1 if trip is in the morning peak, 0 otherwise
+    -----
     '''
-    hour = float(departureTimes_sup['departure_time'].strip().split(':')[0])
+    hour = float(departureTime.strip().split(':')[0])
     if peak_hour[0] <= hour < peak_hour[1]:
         return 1
     else:
@@ -230,11 +244,12 @@ def checkMulti(geom):
     
 def getLineCoords(geom, coord_type):
     '''
-    same as getPtCoords (points) and getCoords (polygons),
+    same as getPtCoords (points) and getPolyCoords (polygons),
     gets the coordinates for line and multiline shapes
     the key difference is that this method returns 
     the x or y coordinate for either multiline plotting or line
     plotting depending on type.
+    
     To implement the plotting, plot each line and 
     multiline elements separately by using the info. from the
     boolean classficiation (see checkMulti)
@@ -266,7 +281,7 @@ def getLineCoords(geom, coord_type):
             
 def getPtCoords(geom, coord_type):
     '''
-    same as getCoords but for points
+    same as getPolyCoords but for points
     instead of polygons
     -----
     input geom: element of the geometry column
@@ -283,7 +298,7 @@ def getPtCoords(geom, coord_type):
 
 
         
-def getCoords(geom, coord_type):
+def getPolyCoords(geom, coord_type):
     '''
     returns the coordinates for the geometry column
     of a polygon
