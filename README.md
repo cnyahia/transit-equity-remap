@@ -22,8 +22,8 @@ the census tracts and the buffers is used to weight the contribution of each tra
 
 The results indicate that CapRemap did not significantly improve service throughout the network. In fact, for all demographics, there was a decrease in the expected number of buses passing during the morning peak. 
 Although CapMetro provided a *high frequency network* with improved service on specific routes, these improvements were at the expense of other non-frequent lines. That said, in contrast to activists' claims, there is no clear 
-indication that minorities experienced greater service reductions. Minority areas were alloted 55% of the total service improvements (doors opening) and they received 52% of the total service reductions. Meanwhile, areas with 
-White people were alloted 45% of the total service improvements and they received 47% of the total service reductions. These results show that minority areas did not receive a lower fraction of the service improvements and a 
+indication that minorities experienced greater service reductions. Minority areas were allotted 55% of the total service improvements (doors opening) and they received 52% of the total service reductions. Meanwhile, areas with 
+White people were allotted 45% of the total service improvements and they received 47% of the total service reductions. These results show that minority areas did not receive a lower fraction of the service improvements and a 
 greater fraction of the service reductions, which indicates that there is no apparent bias against minorities in the distribution of service changes. 
 
 ## Files
