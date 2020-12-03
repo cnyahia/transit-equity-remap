@@ -3,7 +3,7 @@
 
 ## Description
 To view code, problem description, and *interactive plots*, check out [https://cnyahia.github.io/transit-equity-remap/](https://cnyahia.github.io/transit-equity-remap/).
-For more discussion on this analysis visit 
+For more discussion on this analysis check out [this blog post](https://cesnyah.medium.com/equity-in-transit-planning-are-we-using-the-right-metrics-230d6c741d8c)
 
 This repository includes equity analysis for CapMetro's restructuring of its transit system in 2018. CapRemap was controversial-- many activists claim that it had a disproportionately adverse impact on minorities.
 

@@ -6,10 +6,6 @@ analysis
 @cesnyah
 """
 import numpy as np
-import sklearn
-from scipy.spatial import distance
-import datetime
-
 
 
 def getBusCount(stops_row_id, dep_times):
